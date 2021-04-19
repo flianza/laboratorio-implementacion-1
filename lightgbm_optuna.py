@@ -6,7 +6,7 @@ from optimizers import LightGbmOptimizer
 from studies import Study
 
 seed = 42
-trials = 10
+trials = 2
 file_to_train = 'datasets/201905_fechas_drifting_montos.csv'
 file_to_predict = 'datasets/201907_fechas_drifting_montos.csv'
 
@@ -33,7 +33,7 @@ with Study(optimizer, file_to_train, file_to_predict, trials, seed) as study:
     study_importance = study.optimize()
     study.log_csv(study_importance, f'{study.experiment_files_prefix}_study_importance.csv')
 
-    best_models = optimizer.get_best_models(5)
+    best_models = optimizer.get_best_models(2)
 
     for model in best_models:
         importance = model.get_feature_importance(X.names)

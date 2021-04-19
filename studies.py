@@ -25,8 +25,9 @@ class Study(Generic[TModelOptimizer]):
     def __enter__(self):
         self.experiment_number, self.experiment_files_prefix = start_experiment(self.__dict__)
 
+        storage = f'sqlite:///{self.experiment_files_prefix}_study.db'
         self.optuna_study = optuna.create_study(study_name=self.experiment_number, direction='maximize',
-                                                sampler=TPESampler(seed=self.seed))
+                                                sampler=TPESampler(seed=self.seed), storage=storage)
 
         return self
 
