@@ -2,7 +2,7 @@ import datatable as dt
 import numpy as np
 from sklearn.model_selection import StratifiedKFold
 
-from optimizers import LightGbmOptimizer
+from optimizers import LightGBMOptimizer
 from studies import Study
 
 seed = 42
@@ -26,7 +26,7 @@ X_val = X_dataset[test, :]
 y_val = y_dataset[test, :]
 weight_val = weight_dataset[test, :]
 
-optimizer = LightGbmOptimizer(X, y.to_numpy(), weight.to_numpy(),
+optimizer = LightGBMOptimizer(X, y.to_numpy(), weight.to_numpy(),
                               X_val, y_val.to_numpy(), weight_val.to_numpy())
 
 with Study(optimizer, file_to_train, file_to_predict, trials, seed) as study:
@@ -36,12 +36,12 @@ with Study(optimizer, file_to_train, file_to_predict, trials, seed) as study:
     best_models = optimizer.get_best_models(2)
 
     for model in best_models:
-        importance = model.get_feature_importance(X.names)
-        study.log_csv(importance, f'{study.experiment_files_prefix}_{model.name}_importance.csv')
+        importance = model.get_feature_importance()
+        study.log_csv(importance, f'{study.experiment_files_prefix}_{model}_importance.csv')
 
         dapply = dt.fread(file_to_predict)
         y_pred = model.predict(dapply)
 
         entrega = dt.Frame(numero_de_cliente=dapply['numero_de_cliente'],
                            estimulo=y_pred > study.best_params['prob_corte'])
-        study.log_csv(entrega, f'{study.experiment_files_prefix}_{model.name}_kaggle.csv')
+        study.log_csv(entrega, f'{study.experiment_files_prefix}_{model}_kaggle.csv')
