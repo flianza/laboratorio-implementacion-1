@@ -55,8 +55,6 @@ class XGBoostModel(StudyModel):
         return self.model.predict(xgb.DMatrix(data))
 
     def get_feature_importance(self) -> dt.Frame:
-        self.model.get_score()
-
         def __obtener_importance(tipo: str) -> pd.DataFrame:
             score = self.model.get_score(importance_type=tipo)
             return pd.DataFrame({'variable': list(score.keys()), tipo: list(score.values())})
@@ -73,4 +71,3 @@ class XGBoostModel(StudyModel):
 
     def get_score(self) -> float:
         return self.model.best_score
-

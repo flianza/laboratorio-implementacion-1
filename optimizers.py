@@ -5,7 +5,6 @@ import xgboost as xgb
 import datatable as dt
 import abc
 from typing import Tuple, TypeVar, Generic
-
 from models import LightGBMModel, StudyModel, XGBoostModel
 from utils import get_score_corte
 
@@ -66,6 +65,7 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
         labels = clases.get_label()
         weights = clases.get_weight()
         score_corte = self.prob_corte
+
         nombre, valor = self._evaluar_funcion_ganancia(scores, labels, weights, score_corte)
 
         return nombre, valor, True
