@@ -8,6 +8,8 @@ import abc
 
 
 class StudyModel(abc.ABC):
+    def __init__(self, model) -> None:
+        self.model = model
 
     @abc.abstractmethod
     def predict(self, data: dt.Frame) -> np.ndarray:
@@ -27,7 +29,7 @@ class StudyModel(abc.ABC):
 
 class LightGBMModel(StudyModel):
     def __init__(self, model: lgb.Booster) -> None:
-        self.model = model
+        super().__init__(model)
 
     def predict(self, data: dt.Frame) -> np.ndarray:
         return self.model.predict(data)
@@ -49,7 +51,7 @@ class LightGBMModel(StudyModel):
 
 class XGBoostModel(StudyModel):
     def __init__(self, model: xgb.Booster) -> None:
-        self.model = model
+        super().__init__(model)
 
     def predict(self, data: dt.Frame) -> np.ndarray:
         return self.model.predict(xgb.DMatrix(data))

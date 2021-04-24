@@ -5,14 +5,14 @@ import neptunecontrib.monitoring.optuna as opt_utils
 from optuna.samplers import TPESampler
 from typing import TypeVar, Generic
 
+from optimizers import ModelOptimizer
 from utils import start_experiment
 
-TModelOptimizer = TypeVar('TModelOptimizer', bound='ModelOptimizer')
+TModelOptimizer = TypeVar('TModelOptimizer', bound=ModelOptimizer)
 
 
 class Study(Generic[TModelOptimizer]):
-    def __init__(self, optimizer: TModelOptimizer, file_to_train: str, file_to_predict: str, trials: int, seed: int):
-        self.optimizer = optimizer
+    def __init__(self, file_to_train: str, file_to_predict: str, trials: int, seed: int):
         self.file_to_train = file_to_train
         self.file_to_predict = file_to_predict
         self.trials = trials
@@ -34,8 +34,8 @@ class Study(Generic[TModelOptimizer]):
     def __exit__(self, type, value, traceback):
         neptune.stop()
 
-    def optimize(self):
-        self.optuna_study.optimize(self.optimizer.evaluate_trial, n_trials=self.trials,
+    def optimize(self, optimizer: TModelOptimizer):
+        self.optuna_study.optimize(optimizer.evaluate_trial, n_trials=self.trials,
                                    callbacks=[opt_utils.NeptuneCallback(log_study=True, log_charts=True)])
         opt_utils.log_study_info(self.optuna_study)
 
