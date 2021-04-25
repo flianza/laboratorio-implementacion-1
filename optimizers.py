@@ -2,8 +2,8 @@ import optuna
 import numpy as np
 import lightgbm as lgb
 import xgboost as xgb
-import datatable as dt
 import abc
+from datatable import Frame
 from typing import Tuple, TypeVar, Generic
 from models import LightGBMModel, StudyModel, XGBoostModel
 from utils import get_score_corte
@@ -12,8 +12,8 @@ TStudyModel = TypeVar('TStudyModel', bound=StudyModel)
 
 
 class ModelOptimizer(abc.ABC, Generic[TStudyModel]):
-    def __init__(self, X: dt.Frame, y: np.ndarray, weights: np.ndarray,
-                 X_val: dt.Frame, y_val: np.ndarray, weights_val: np.ndarray,
+    def __init__(self, X: Frame, y: np.ndarray, weights: np.ndarray,
+                 X_val: Frame, y_val: np.ndarray, weights_val: np.ndarray,
                  prob_corte=0.025):
         self.X = X
         self.y = y
@@ -47,8 +47,8 @@ class ModelOptimizer(abc.ABC, Generic[TStudyModel]):
 
 
 class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
-    def __init__(self, X: dt.Frame, y: np.ndarray, weights: np.ndarray,
-                 X_val: dt.Frame, y_val: np.ndarray, weights_val: np.ndarray,
+    def __init__(self, X: Frame, y: np.ndarray, weights: np.ndarray,
+                 X_val: Frame, y_val: np.ndarray, weights_val: np.ndarray,
                  prob_corte=0.025):
         super().__init__(X, y, weights, X_val, y_val, weights_val, prob_corte)
 
@@ -101,8 +101,8 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
 
 
 class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
-    def __init__(self, X: dt.Frame, y: np.ndarray, weights: np.ndarray,
-                 X_val: dt.Frame, y_val: np.ndarray, weights_val: np.ndarray,
+    def __init__(self, X: Frame, y: np.ndarray, weights: np.ndarray,
+                 X_val: Frame, y_val: np.ndarray, weights_val: np.ndarray,
                  prob_corte=0.025):
         super().__init__(X, y, weights, X_val, y_val, weights_val, prob_corte)
         self.__actualizar_prob_corte(prob_corte)

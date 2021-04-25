@@ -2,9 +2,9 @@ from typing import Union
 import numpy as np
 import lightgbm as lgb
 import xgboost as xgb
-import datatable as dt
 import pandas as pd
 import abc
+from datatable import Frame, f
 
 
 class StudyModel(abc.ABC):
@@ -12,11 +12,11 @@ class StudyModel(abc.ABC):
         self.model = model
 
     @abc.abstractmethod
-    def predict(self, data: dt.Frame) -> np.ndarray:
+    def predict(self, data: Frame) -> np.ndarray:
         pass
 
     @abc.abstractmethod
-    def get_feature_importance(self) -> Union[dt.Frame, pd.DataFrame]:
+    def get_feature_importance(self) -> Union[Frame, pd.DataFrame]:
         pass
 
     @abc.abstractmethod
@@ -31,17 +31,17 @@ class LightGBMModel(StudyModel):
     def __init__(self, model: lgb.Booster) -> None:
         super().__init__(model)
 
-    def predict(self, data: dt.Frame) -> np.ndarray:
+    def predict(self, data: Frame) -> np.ndarray:
         return self.model.predict(data)
 
-    def get_feature_importance(self) -> dt.Frame:
+    def get_feature_importance(self) -> Frame:
         gain_importance = self.model.feature_importance(importance_type='gain')
         split_importance = self.model.feature_importance(importance_type='split')
 
-        importance = dt.Frame(variable=self.model.feature_name(),
-                              gain=gain_importance,
-                              split=split_importance)
-        importance = importance.sort(-dt.f.gain)
+        importance = Frame(variable=self.model.feature_name(),
+                           gain=gain_importance,
+                           split=split_importance)
+        importance = importance.sort(-f.gain)
 
         return importance
 
@@ -53,10 +53,10 @@ class XGBoostModel(StudyModel):
     def __init__(self, model: xgb.Booster) -> None:
         super().__init__(model)
 
-    def predict(self, data: dt.Frame) -> np.ndarray:
+    def predict(self, data: Frame) -> np.ndarray:
         return self.model.predict(xgb.DMatrix(data))
 
-    def get_feature_importance(self) -> dt.Frame:
+    def get_feature_importance(self) -> Frame:
         def __obtener_importance(tipo: str) -> pd.DataFrame:
             score = self.model.get_score(importance_type=tipo)
             return pd.DataFrame({'variable': list(score.keys()), tipo: list(score.values())})

@@ -1,6 +1,6 @@
 import argparse
-import datatable as dt
 import numpy as np
+from datatable import fread, f, ifelse, Frame
 from sklearn.model_selection import StratifiedKFold
 
 from optimizers import XGBoostOptimizer, LightGBMOptimizer
@@ -22,16 +22,16 @@ if __name__ == '__main__':
     file_to_predict = 'datasets/201907_fechas_drifting_montos.csv'
     np.random.seed(seed)
 
-    dataset = dt.fread(file_to_train)
+    dataset = fread(file_to_train)
 
     if args.binaria_especial:
-        dataset['target'] = dataset[:, dt.f.clase_ternaria != 'CONTINUA']
-        weight_dataset = dataset[:, dt.ifelse(dt.f.clase_ternaria == 'BAJA+2', 1.0000001, 1)]
+        dataset['target'] = dataset[:, f.clase_ternaria != 'CONTINUA']
+        weight_dataset = dataset[:, ifelse(f.clase_ternaria == 'BAJA+2', 1.0000001, 1)]
     else:
-        dataset['target'] = dataset[:, dt.f.clase_ternaria == 'BAJA+2']
+        dataset['target'] = dataset[:, f.clase_ternaria == 'BAJA+2']
         weight_dataset = None
 
-    X_dataset = dataset[:, dt.f[:].remove([dt.f.clase_ternaria, dt.f.target])]
+    X_dataset = dataset[:, f[:].remove([f.clase_ternaria, f.target])]
     y_dataset = dataset[:, 'target']
 
     train, test = StratifiedKFold(n_splits=2).split(X_dataset, y_dataset)
@@ -57,10 +57,10 @@ if __name__ == '__main__':
             importance = model.get_feature_importance()
             study.log_csv(importance, f'{study.experiment_files_prefix}_{model}_importance.csv')
 
-            dapply = dt.fread(file_to_predict)
+            dapply = fread(file_to_predict)
             y_pred = model.predict(dapply)
 
-            apply = dt.Frame(numero_de_cliente=dapply['numero_de_cliente'],
-                             prob=y_pred,
-                             estimulo=y_pred > study.best_params['prob_corte'])
+            apply = Frame(numero_de_cliente=dapply['numero_de_cliente'],
+                          prob=y_pred,
+                          estimulo=y_pred > study.best_params['prob_corte'])
             study.log_csv(apply, f'{study.experiment_files_prefix}_{model}_apply.csv')
