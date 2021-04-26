@@ -1,10 +1,24 @@
-from datatable import Frame, f, ifelse, shift, fread
+from datatable import Frame, f, ifelse, shift, fread, by, shift
+import pandas as pd
 import datatable as dt
 import random
 
+from utils import timer
+
+
+VENTANA = 6
+
 
 def run(dataset: Frame) -> Frame:
-    # Errores del dataset
+    dataset = arreglar_errores_dataset_original(dataset)
+    dataset = agregar_variables_nuevas(dataset)
+    dataset = agregar_variables_historicas_python(dataset)
+
+    return dataset
+
+
+@timer
+def arreglar_errores_dataset_original(dataset: Frame) -> Frame:
     dataset[f.foto_mes == 201701, 'ccajas_consultas'] = None
     dataset[f.foto_mes == 201702, 'ccajas_consultas'] = None
 
@@ -54,7 +68,11 @@ def run(dataset: Frame) -> Frame:
 
     dataset[f.foto_mes == 202001, 'cliente_vip'] = None
 
-    # Agregado de nuevas variables
+    return dataset
+
+
+@timer
+def agregar_variables_nuevas(dataset: Frame) -> Frame:
     dataset['tarjetas_status01'] = dataset[:, dt.rowmax([f.Master_status, f.Visa_status])]
     dataset['tarjetas_status02'] = dataset[:, dt.rowmin([f.Master_status, f.Visa_status])]
     dataset['tarjetas_fultimo_cierre01'] = dataset[:, dt.rowmax([f.Master_fultimo_cierre, f.Visa_fultimo_cierre])]
@@ -81,27 +99,64 @@ def run(dataset: Frame) -> Frame:
     dataset['tarjetas_cadelantosefectivo'] = dataset[:, dt.rowsum([f.Master_cadelantosefectivo, f.Visa_cadelantosefectivo])]
     dataset['tarjetas_mpagominimo'] = dataset[:, dt.rowsum([f.Master_mpagominimo, f.Visa_mpagominimo])]
 
-    # a partir de aqui juego con la suma de Mastercard y Visa
-    # dataset[, mvr_Master_mlimitecompra := Master_mlimitecompra / mv_mlimitecompra]
-    # dataset[, mvr_Visa_mlimitecompra := Visa_mlimitecompra / mv_mlimitecompra]
-    # dataset[, mvr_msaldototal := mv_msaldototal / mv_mlimitecompra]
-    # dataset[, mvr_msaldopesos := mv_msaldopesos / mv_mlimitecompra]
-    # dataset[, mvr_msaldopesos2 := mv_msaldopesos / mv_msaldototal]
-    # dataset[, mvr_msaldodolares := mv_msaldodolares / mv_mlimitecompra]
-    # dataset[, mvr_msaldodolares2 := mv_msaldodolares / mv_msaldototal]
-    # dataset[, mvr_mconsumospesos := mv_mconsumospesos / mv_mlimitecompra]
-    # dataset[, mvr_mconsumosdolares := mv_mconsumosdolares / mv_mlimitecompra]
-    # dataset[, mvr_madelantopesos := mv_madelantopesos / mv_mlimitecompra]
-    # dataset[, mvr_madelantodolares := mv_madelantodolares / mv_mlimitecompra]
-    # dataset[, mvr_mpagado := mv_mpagado / mv_mlimitecompra]
-    # dataset[, mvr_mpagospesos := mv_mpagospesos / mv_mlimitecompra]
-    # dataset[, mvr_mpagosdolares := mv_mpagosdolares / mv_mlimitecompra]
-    # dataset[, mvr_mconsumototal := mv_mconsumototal / mv_mlimitecompra]
-    # dataset[, mvr_mpagominimo := mv_mpagominimo / mv_mlimitecompra]
+    dataset['ratio_Master_mlimitecompra__tarjetas_mlimitecompra'] = dataset[:, f.Master_mlimitecompra / f.tarjetas_mlimitecompra]
+    dataset['ratio_Visa_mlimitecompra__tarjetas_mlimitecompra'] = dataset[:, f.Visa_mlimitecompra / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_msaldototal__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mlimitecompra / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_msaldopesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_msaldopesos / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_msaldopesos__tarjetas_msaldototal'] = dataset[:, f.tarjetas_msaldopesos / f.tarjetas_msaldototal]
+    dataset['ratio_tarjetas_msaldodolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_msaldodolares / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_msaldodolares__tarjetas_msaldototal'] = dataset[:, f.tarjetas_msaldodolares / f.tarjetas_msaldototal]
+    dataset['ratio_tarjetas_mconsumospesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mconsumospesos / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_mconsumosdolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mconsumosdolares / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_madelantopesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_madelantopesos / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_madelantodolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_madelantodolares / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_mpagado__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagado / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_mpagospesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagospesos / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_mpagosdolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagosdolares / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_mconsumototal__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mconsumototal / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_mpagominimo__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagominimo / f.tarjetas_mlimitecompra]
 
     return dataset
 
 
+@timer
+def agregar_variables_historicas_python(dataset: Frame) -> Frame:
+    dataset = dataset[:, :, dt.sort('numero_de_cliente', 'foto_mes')]
+    valores_historicos = obtener_valores_historicos_para_columna('mcuentas_saldo', dataset)
+    dataset.cbind(valores_historicos)
+    return dataset
+
+
+@timer
+def obtener_valores_historicos_para_columna(columna: str, dataset: Frame) -> Frame:
+    previo = create_roll_columns(dataset[:, ['numero_de_cliente', columna]].to_pandas(),
+                                 ['numero_de_cliente'],
+                                 VENTANA,
+                                 [columna],
+                                 ['max', 'min'])
+    previo = Frame(previo)
+
+    previo[f'{columna}_previo'] = dataset[:, shift(f[columna]), by('numero_de_cliente')][columna]
+
+    previo = previo[:, f[:].remove([f[columna], f.numero_de_cliente])]
+
+    return previo
+
+
+def create_roll_columns (x: pd.DataFrame, g_c: [str], roll: int, roll_cols: [str], roll_types: [str]):
+    for i in roll_cols:
+        rolling = x.groupby(g_c)[i].rolling(roll, min_periods=1)
+        for aggregation in roll_types:
+            if aggregation == 'max':
+                nm = f'{i}_roll_max'
+                x[nm] = rolling.max().reset_index(0, drop=True)
+            if aggregation == 'min':
+                nm = f'{i}_roll_min'
+                x[nm] = rolling.min().reset_index(0, drop=True)
+    return x
+
+
+@timer
 def agregar_canaritos(dataset: Frame, cantidad: int = 20) -> Frame:
     for i in range(cantidad):
         nombre_canarito = f'canarito{i}'
@@ -109,6 +164,13 @@ def agregar_canaritos(dataset: Frame, cantidad: int = 20) -> Frame:
     return dataset
 
 
+@timer
+def leer_dataset() -> Frame:
+    return fread('datasets/originales/datos.gz')
+
+
 if __name__ == '__main__':
-    dataset = fread('datasets/originales/datos.gz')
+    dataset = leer_dataset()
     dataset = run(dataset)
+    print(dataset.head(25))
+

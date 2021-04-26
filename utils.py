@@ -1,4 +1,6 @@
 import os
+import functools
+import time
 import neptune
 import numpy as np
 from pathlib import Path
@@ -23,3 +25,14 @@ def start_experiment(params: dict) -> Tuple[str, str]:
     os.mkdir(experiment_path)
     return experiment_number, f'{experiment_path}/{experiment_number}'
 
+
+def timer(func):
+    @functools.wraps(func)
+    def wrapper_timer(*args, **kwargs):
+        start_time = time.perf_counter()
+        value = func(*args, **kwargs)
+        end_time = time.perf_counter()
+        duration = end_time - start_time
+        print(f'Completado: {func.__name__!r} en {duration:.4f}segs')
+        return value
+    return wrapper_timer
