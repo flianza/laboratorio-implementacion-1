@@ -1,18 +1,12 @@
-from datatable import Frame, f, ifelse, shift, fread, by, shift
-import pandas as pd
+from datatable import Frame, f, fread
 import datatable as dt
 import random
-
 from utils import timer
-
-
-VENTANA = 6
 
 
 def run(dataset: Frame) -> Frame:
     dataset = arreglar_errores_dataset_original(dataset)
     dataset = agregar_variables_nuevas(dataset)
-    dataset = agregar_variables_historicas_python(dataset)
 
     return dataset
 
@@ -117,43 +111,6 @@ def agregar_variables_nuevas(dataset: Frame) -> Frame:
     dataset['ratio_tarjetas_mpagominimo__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagominimo / f.tarjetas_mlimitecompra]
 
     return dataset
-
-
-@timer
-def agregar_variables_historicas_python(dataset: Frame) -> Frame:
-    dataset = dataset[:, :, dt.sort('numero_de_cliente', 'foto_mes')]
-    valores_historicos = obtener_valores_historicos_para_columna('mcuentas_saldo', dataset)
-    dataset.cbind(valores_historicos)
-    return dataset
-
-
-@timer
-def obtener_valores_historicos_para_columna(columna: str, dataset: Frame) -> Frame:
-    previo = create_roll_columns(dataset[:, ['numero_de_cliente', columna]].to_pandas(),
-                                 ['numero_de_cliente'],
-                                 VENTANA,
-                                 [columna],
-                                 ['max', 'min'])
-    previo = Frame(previo)
-
-    previo[f'{columna}_previo'] = dataset[:, shift(f[columna]), by('numero_de_cliente')][columna]
-
-    previo = previo[:, f[:].remove([f[columna], f.numero_de_cliente])]
-
-    return previo
-
-
-def create_roll_columns (x: pd.DataFrame, g_c: [str], roll: int, roll_cols: [str], roll_types: [str]):
-    for i in roll_cols:
-        rolling = x.groupby(g_c)[i].rolling(roll, min_periods=1)
-        for aggregation in roll_types:
-            if aggregation == 'max':
-                nm = f'{i}_roll_max'
-                x[nm] = rolling.max().reset_index(0, drop=True)
-            if aggregation == 'min':
-                nm = f'{i}_roll_min'
-                x[nm] = rolling.min().reset_index(0, drop=True)
-    return x
 
 
 @timer
