@@ -13,8 +13,8 @@ def get_score_corte(prob=0.025) -> float:
 
 def start_experiment(params: dict) -> Tuple[str, str]:
     api_token = 'eyJhcGlfYWRkcmVzcyI6Imh0dHBzOi8vYXBwLm5lcHR1bmUuYWkiLCJhcGlfdXJsIjoiaHR0cHM6Ly9hcHAubmVwdHVuZS5haSIsImFwaV9rZXkiOiI4ZTBhNWNhZS0xNTNkLTQ2NjktODI0ZC1kOTAyMzhmNzllNDAifQ=='
-    neptune.init('flianza/laboratorio-1-mes', api_token=api_token)
-    neptune.create_experiment('lightgbm-tuning', tags=['lightgbm', 'tuning', 'optuna'], params=params)
+    neptune.init('flianza/laboratorio-1', api_token=api_token)
+    neptune.create_experiment('tuning', params=params)
 
     experiment_number = neptune.get_experiment().id
 

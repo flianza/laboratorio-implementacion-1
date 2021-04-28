@@ -12,7 +12,7 @@ TModelOptimizer = TypeVar('TModelOptimizer', bound=ModelOptimizer)
 
 
 class Study(Generic[TModelOptimizer]):
-    def __init__(self, file_to_train: str, file_to_predict: str, trials: int, seed: int):
+    def __init__(self, file_to_train, file_to_predict, trials: int, seed: int):
         self.file_to_train = file_to_train
         self.file_to_predict = file_to_predict
         self.trials = trials
