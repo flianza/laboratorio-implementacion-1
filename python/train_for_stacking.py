@@ -68,7 +68,7 @@ if __name__ == '__main__':
         best_models = optimizer.get_best_models()
 
         dataset = fread(TRAIN_PARAMS['file_data'])[:, f[:].remove([f.clase_ternaria])]
-        dapply_stacking = dataset[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_entero'], :]
+        dapply_stacking = dataset
         dapply_kaggle = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_kaggle'], :]
 
         for model in best_models:
