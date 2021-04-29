@@ -13,8 +13,8 @@ parser.set_defaults(binaria_especial=True)
 
 TRAIN_PARAMS = {
     'seed': 42,
-    'trials': 2,
-    'file_data': '../datasets/datos_2020_fe.gz',
+    'trials': 10,
+    'file_data': '../datasets/datos_fe_hist.gz',
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
     'max_foto_mes_entero': 202003,
@@ -53,6 +53,8 @@ if __name__ == '__main__':
     weights_val = None
     if args.binaria_especial:
         weights_val = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_val'], f.weight]
+
+    dataset = None
 
     with Study(TRAIN_PARAMS) as study:
         if args.model == 'xgboost':
