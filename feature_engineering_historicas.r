@@ -78,9 +78,12 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde) 
 }')
 
 VENTANA <- 6
-t1 <- Sys.time()
+t0 <- Sys.time()
 
-dataset <- fread("./datasets/data_fe.gz")
+cat("Leyendo dataset\n")
+
+dataset <- fread("../datasets/datos_fe.gz")
+cat("Dataset leido\n")
 
 setorder(dataset, numero_de_cliente, foto_mes)
 
@@ -102,12 +105,13 @@ for(i in 2:last) {
 }
 
 columnas_no_procesar <- c("numero_de_cliente", "foto_mes", "clase_ternaria")
-columnas_a_procesar <- setdiff(names(dataset), columnas_no_procesar)  
+columnas_a_procesar <- setdiff(names(dataset), columnas_no_procesar)
 
 for(campo in columnas_a_procesar) {
+  cat("Corriendo C para columna", campo, "\n")
   campo_idx <- match(campo, names(dataset))
   col_original <- dataset[[campo_idx]]
-  
+
   nueva_col <- fhistC(col_original, vector_desde) 
   
   dataset[, paste(campo, "__tend", sep="") := nueva_col[(0*last+1):(1*last)]]
@@ -120,12 +124,15 @@ for(campo in columnas_a_procesar) {
 nuevo_orden <- c(setdiff(colnames(dataset), "clase_ternaria"), "clase_ternaria")
 setcolorder(dataset, nuevo_orden)
 
-fwrite(dataset, file="./datasets/data_fe_hist.gz")
-
 t1 <- Sys.time()
 tiempo <- as.numeric(t1 - t0, units = "secs")
-
 cat("El Feature Engineering ha corrido en: ", tiempo, " segundos.\n")
+
+cat("Guardando archivo\n")
+
+fwrite(dataset, file="../datasets/datos_fe_hist.gz")
+
+cat("Archivo guardado\n")
 
 rm(list=ls())
 gc()
