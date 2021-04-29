@@ -2,8 +2,8 @@ import argparse
 import numpy as np
 from datatable import fread, f, ifelse, Frame
 
-from python.optimizers import XGBoostOptimizer, LightGBMOptimizer
-from python.studies import Study
+from optimizers import XGBoostOptimizer, LightGBMOptimizer
+from studies import Study
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model')

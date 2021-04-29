@@ -5,8 +5,8 @@ import neptunecontrib.monitoring.optuna as opt_utils
 from optuna.samplers import TPESampler
 from typing import TypeVar, Generic
 
-from python.optimizers import ModelOptimizer
-from python.utils import start_experiment
+from optimizers import ModelOptimizer
+from utils import start_experiment
 
 TModelOptimizer = TypeVar('TModelOptimizer', bound=ModelOptimizer)
 

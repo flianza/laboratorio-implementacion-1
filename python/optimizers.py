@@ -5,8 +5,8 @@ import xgboost as xgb
 import abc
 from datatable import Frame
 from typing import Tuple, TypeVar, Generic
-from python.models import LightGBMModel, StudyModel, XGBoostModel
-from python.utils import get_score_corte
+from models import LightGBMModel, StudyModel, XGBoostModel
+from utils import get_score_corte
 
 TStudyModel = TypeVar('TStudyModel', bound=StudyModel)
 
