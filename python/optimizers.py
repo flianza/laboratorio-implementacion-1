@@ -51,8 +51,10 @@ class ModelOptimizer(abc.ABC, Generic[TStudyModel]):
 class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
     def __init__(self, X: Frame, y: np.ndarray, weights: np.ndarray,
                  X_val: Frame, y_val: np.ndarray, weights_val: np.ndarray,
-                 prob_corte=0.025):
+                 prob_corte_min=0.02, prob_corte_max=0.03, prob_corte=0.025):
         super().__init__(X, y.to_numpy(), weights.to_numpy(), X_val, y_val.to_numpy(), weights_val.to_numpy(), prob_corte)
+        self.prob_corte_min = prob_corte_min
+        self.prob_corte_max = prob_corte_max
 
         self.fixed_params = {
             'objective': 'binary',
@@ -73,7 +75,7 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
         return nombre, valor, True
 
     def evaluate_trial(self, trial: optuna.Trial) -> float:
-        self.prob_corte = trial.suggest_float('prob_corte', 0.1, 0.2)
+        self.prob_corte = trial.suggest_float('prob_corte', self.prob_corte_min, self.prob_corte_max)
 
         variable_params = {
             'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
@@ -105,9 +107,11 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
 class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
     def __init__(self, X: Frame, y: np.ndarray, weights: np.ndarray,
                  X_val: Frame, y_val: np.ndarray, weights_val: np.ndarray,
-                 prob_corte=0.025):
+                 prob_corte_min=0.02, prob_corte_max=0.03, prob_corte=0.025):
         super().__init__(X, y, weights, X_val, y_val, weights_val, prob_corte)
         self.__actualizar_prob_corte(prob_corte)
+        self.prob_corte_min = prob_corte_min
+        self.prob_corte_max = prob_corte_max
 
         self.fixed_params = {
             'objective': 'binary:logistic',
@@ -128,7 +132,7 @@ class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
         return self._evaluar_funcion_ganancia(scores, labels, weights, score_corte)
 
     def evaluate_trial(self, trial: optuna.Trial) -> float:
-        self.__actualizar_prob_corte(trial.suggest_float('prob_corte', 0.1, 0.2))
+        self.__actualizar_prob_corte(trial.suggest_float('prob_corte', self.prob_corte_min, self.prob_corte_max))
 
         variable_params = {
             'eta': trial.suggest_float('eta', 0.01, 0.3),
