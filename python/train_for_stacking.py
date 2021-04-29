@@ -77,6 +77,7 @@ if __name__ == '__main__':
 
             y_pred = model.predict(dapply_stacking)
             apply_stacking = Frame(numero_de_cliente=dapply_stacking['numero_de_cliente'],
+                                   foto_mes=dapply_stacking['foto_mes'],
                                    prob=y_pred,
                                    estimulo=y_pred > study.best_params['prob_corte'])
             study.log_csv(apply_stacking, f'{study.experiment_files_prefix}_{model}_stacking_apply.csv')
