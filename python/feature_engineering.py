@@ -1,7 +1,7 @@
 from datatable import Frame, f, fread
 import datatable as dt
 import random
-from utils import timer
+from python.utils import timer
 
 
 def run(dataset: Frame) -> Frame:
@@ -68,7 +68,7 @@ def arreglar_errores_dataset_original(dataset: Frame) -> Frame:
 
 @timer
 def eliminar_registros_viejos(dataset: Frame) -> Frame:
-    dataset = dataset[f.foto_mes > 201812, :]
+    dataset = dataset[f.foto_mes > 201912, :]
 
     return dataset
 
@@ -137,5 +137,5 @@ def leer_dataset() -> Frame:
 if __name__ == '__main__':
     dataset = leer_dataset()
     dataset = run(dataset)
-    dataset.to_csv(path='datasets/datos_fe.gz', compression='gzip')
+    dataset.to_csv(path='datasets/datos_2020_fe.gz', compression='gzip')
 

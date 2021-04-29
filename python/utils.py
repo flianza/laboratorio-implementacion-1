@@ -18,7 +18,7 @@ def start_experiment(params: dict) -> Tuple[str, str]:
 
     experiment_number = neptune.get_experiment().id
 
-    experiments_folder = 'experimentos'
+    experiments_folder = '../experimentos'
     experiment_path = f'{experiments_folder}/{experiment_number}'
     if not Path(experiments_folder).exists():
         os.mkdir(experiments_folder)

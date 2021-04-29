@@ -5,8 +5,8 @@ import xgboost as xgb
 import abc
 from datatable import Frame
 from typing import Tuple, TypeVar, Generic
-from models import LightGBMModel, StudyModel, XGBoostModel
-from utils import get_score_corte
+from python.models import LightGBMModel, StudyModel, XGBoostModel
+from python.utils import get_score_corte
 
 TStudyModel = TypeVar('TStudyModel', bound=StudyModel)
 
@@ -30,16 +30,18 @@ class ModelOptimizer(abc.ABC, Generic[TStudyModel]):
         pass
 
     def get_best_models(self, n=5) -> [TStudyModel]:
+        if n > len(self.models):
+            n = len(self.models)
         return sorted(self.models, key=lambda m: m.get_score(), reverse=True)[:n]
 
     @staticmethod
     def _evaluar_funcion_ganancia(scores, labels, weights, score_corte) -> Tuple[str, int]:
         scores_prob_corte = scores > score_corte
 
-        if weights is not None:
-            ganancias = np.where((labels == 1) & (weights > 1), 29250, -750)
-        else:
+        if len(weights) == 0:
             ganancias = np.where(labels == 1, 29250, -750)
+        else:
+            ganancias = np.where((labels == 1) & (weights > 1), 29250, -750)
 
         ganancia_actual = np.dot(scores_prob_corte, ganancias)
 
@@ -50,7 +52,7 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
     def __init__(self, X: Frame, y: np.ndarray, weights: np.ndarray,
                  X_val: Frame, y_val: np.ndarray, weights_val: np.ndarray,
                  prob_corte=0.025):
-        super().__init__(X, y, weights, X_val, y_val, weights_val, prob_corte)
+        super().__init__(X, y.to_numpy(), weights.to_numpy(), X_val, y_val.to_numpy(), weights_val.to_numpy(), prob_corte)
 
         self.fixed_params = {
             'objective': 'binary',
@@ -71,7 +73,7 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
         return nombre, valor, True
 
     def evaluate_trial(self, trial: optuna.Trial) -> float:
-        self.prob_corte = trial.suggest_float('prob_corte', 0.025, 0.05)
+        self.prob_corte = trial.suggest_float('prob_corte', 0.1, 0.2)
 
         variable_params = {
             'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
@@ -126,7 +128,7 @@ class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
         return self._evaluar_funcion_ganancia(scores, labels, weights, score_corte)
 
     def evaluate_trial(self, trial: optuna.Trial) -> float:
-        self.__actualizar_prob_corte(trial.suggest_float('prob_corte', 0.025, 0.05))
+        self.__actualizar_prob_corte(trial.suggest_float('prob_corte', 0.1, 0.2))
 
         variable_params = {
             'eta': trial.suggest_float('eta', 0.01, 0.3),
