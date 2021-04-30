@@ -38,7 +38,7 @@ class ModelOptimizer(abc.ABC, Generic[TStudyModel]):
     def _evaluar_funcion_ganancia(scores, labels, weights, score_corte) -> Tuple[str, int]:
         scores_prob_corte = scores > score_corte
 
-        if len(weights) == 0 | weights is None:
+        if len(weights) == 0 or weights is None:
             ganancias = np.where(labels == 1, 29250, -750)
         else:
             ganancias = np.where((labels == 1) & (weights > 1), 29250, -750)

@@ -39,7 +39,7 @@ if __name__ == '__main__':
                 dataset[f'{experimento}_{count}_estimulo'] = stacking['estimulo']
                 count += 1
 
-    dapply_kaggle = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_kaggle'], :]
+    dapply_kaggle = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_kaggle'], f[:].remove([f.clase_ternaria])]
     dataset = dataset[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_entero'], :]
     dataset['azar'] = np.random.uniform(size=dataset.shape[0])
     dataset['clase01'] = dataset[:, ifelse(f.clase_ternaria == 'CONTINUA', 0, 1)]
