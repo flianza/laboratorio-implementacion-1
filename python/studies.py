@@ -2,7 +2,6 @@ import datatable as dt
 import optuna
 import neptune
 import neptunecontrib.monitoring.optuna as opt_utils
-from optuna.samplers import TPESampler
 from typing import TypeVar, Generic
 
 from optimizers import ModelOptimizer
@@ -23,8 +22,7 @@ class Study(Generic[TModelOptimizer]):
         self.experiment_number, self.experiment_files_prefix = start_experiment(self.train_params)
 
         storage = f'sqlite:///{self.experiment_files_prefix}_study.db'
-        self.optuna_study = optuna.create_study(study_name=self.experiment_number, direction='maximize',
-                                                sampler=TPESampler(seed=self.train_params['seed']), storage=storage)
+        self.optuna_study = optuna.create_study(study_name=self.experiment_number, direction='maximize', storage=storage)
 
         return self
 

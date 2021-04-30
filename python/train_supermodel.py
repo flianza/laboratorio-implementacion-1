@@ -14,16 +14,13 @@ parser.set_defaults(binaria_especial=True)
 parser.add_argument("--experimentos", nargs="+", default=[])
 
 TRAIN_PARAMS = {
-    'seed': 42,
-    'trials': 10,
-    'file_data': '../datasets/datos_2020_fe.gz',
+    'trials': 20,
+    'file_data': '../datasets/datos_fe_hist.gz',
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
     'max_foto_mes_entero': 202003,
     'foto_mes_kaggle': 202005,
 }
-
-np.random.seed(TRAIN_PARAMS['seed'])
 
 if __name__ == '__main__':
     args = parser.parse_args()
@@ -33,29 +30,33 @@ if __name__ == '__main__':
     TRAIN_PARAMS['experimentos'] = args.experimentos
 
     dataset = fread(TRAIN_PARAMS['file_data'])
+    count = 1
     for experimento in args.experimentos:
         for file in os.listdir(f'../experimentos/{experimento}/'):
             if file.endswith('stacking_apply.csv'):
                 stacking = fread(f'../experimentos/{experimento}/{file}')
-                dataset[f'{experimento}_prob'] = stacking['prob']
-                dataset[f'{experimento}_estimulo'] = stacking['estimulo']
+                dataset[f'{experimento}_{count}_prob'] = stacking['prob']
+                dataset[f'{experimento}_{count}_estimulo'] = stacking['estimulo']
+                count += 1
 
     dapply_kaggle = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_kaggle'], :]
     dataset = dataset[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_entero'], :]
+    dataset['azar'] = np.random.uniform(size=dataset.shape[0])
+    dataset['clase01'] = dataset[:, ifelse(f.clase_ternaria == 'CONTINUA', 0, 1)]
 
     if args.binaria_especial:
         dataset['target'] = dataset[:, f.clase_ternaria != 'CONTINUA']
         dataset['weight'] = dataset[:, ifelse(f.clase_ternaria == 'BAJA+2', 1.0000001, 1)]
-        campos_buenos = f[:].remove([f.clase_ternaria, f.target, f.weight])
+        campos_buenos = f[:].remove([f.clase_ternaria, f.target, f.azar, f.clase01, f.weight])
     else:
         dataset['target'] = dataset[:, f.clase_ternaria == 'BAJA+2']
-        campos_buenos = f[:].remove([f.clase_ternaria, f.target])
+        campos_buenos = f[:].remove([f.clase_ternaria, f.target, f.azar, f.clase01])
 
-    X = dataset[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train'], campos_buenos]
-    y = dataset[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train'], f.target]
+    X = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.5)), campos_buenos]
+    y = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.5)), f.target]
     weights = None
     if args.binaria_especial:
-        weights = dataset[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train'], f.weight]
+        weights = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.5)), f.weight]
 
     X_val = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_val'], campos_buenos]
     y_val = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_val'], f.target]
@@ -67,9 +68,9 @@ if __name__ == '__main__':
 
     with Study(TRAIN_PARAMS) as study:
         if args.model == 'xgboost':
-            optimizer = XGBoostOptimizer(X, y, weights, X_val, y_val, weights_val)
+            optimizer = XGBoostOptimizer(X, y, weights, X_val, y_val, weights_val, 0.05, 0.15)
         else:
-            optimizer = LightGBMOptimizer(X, y, weights, X_val, y_val, weights_val)
+            optimizer = LightGBMOptimizer(X, y, weights, X_val, y_val, weights_val, 0.05, 0.15)
 
         study_importance = study.optimize(optimizer)
         study.log_csv(study_importance, f'{study.experiment_files_prefix}_study_importance.csv')

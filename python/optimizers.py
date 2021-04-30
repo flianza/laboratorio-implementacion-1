@@ -38,7 +38,7 @@ class ModelOptimizer(abc.ABC, Generic[TStudyModel]):
     def _evaluar_funcion_ganancia(scores, labels, weights, score_corte) -> Tuple[str, int]:
         scores_prob_corte = scores > score_corte
 
-        if len(weights) == 0:
+        if len(weights) == 0 | weights is None:
             ganancias = np.where(labels == 1, 29250, -750)
         else:
             ganancias = np.where((labels == 1) & (weights > 1), 29250, -750)
@@ -52,7 +52,8 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
     def __init__(self, X: Frame, y: np.ndarray, weights: np.ndarray,
                  X_val: Frame, y_val: np.ndarray, weights_val: np.ndarray,
                  prob_corte_min=0.02, prob_corte_max=0.03, prob_corte=0.025):
-        super().__init__(X, y.to_numpy(), weights.to_numpy(), X_val, y_val.to_numpy(), weights_val.to_numpy(), prob_corte)
+        super().__init__(X, y.to_numpy(), weights.to_numpy() if weights is not None else None,
+                         X_val, y_val.to_numpy(), weights_val.to_numpy() if weights_val is not None else None, prob_corte)
         self.prob_corte_min = prob_corte_min
         self.prob_corte_max = prob_corte_max
 
