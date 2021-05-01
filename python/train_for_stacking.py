@@ -12,9 +12,9 @@ parser.add_argument('--binaria-comun', dest='binaria_especial', action='store_fa
 parser.set_defaults(binaria_especial=True)
 
 TRAIN_PARAMS = {
-    'seed': 42,
+    'seed': np.random.randint(123456),
     'trials': 10,
-    'file_data': '../datasets/datos_fe_hist.gz',
+    'file_data': '../datasets/datos_fe_hist_v2.gz',
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
     'max_foto_mes_entero': 202003,

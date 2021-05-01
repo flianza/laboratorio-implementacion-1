@@ -4,6 +4,8 @@ import neptune
 import neptunecontrib.monitoring.optuna as opt_utils
 from typing import TypeVar, Generic
 
+from optuna.samplers import TPESampler
+
 from optimizers import ModelOptimizer
 from utils import start_experiment
 
@@ -22,7 +24,8 @@ class Study(Generic[TModelOptimizer]):
         self.experiment_number, self.experiment_files_prefix = start_experiment(self.train_params)
 
         storage = f'sqlite:///{self.experiment_files_prefix}_study.db'
-        self.optuna_study = optuna.create_study(study_name=self.experiment_number, direction='maximize', storage=storage)
+        self.optuna_study = optuna.create_study(study_name=self.experiment_number, direction='maximize',
+                                                storage=storage, sampler=TPESampler(seed=self.train_params['seed']))
 
         return self
 
@@ -30,6 +33,7 @@ class Study(Generic[TModelOptimizer]):
         neptune.stop()
 
     def optimize(self, optimizer: TModelOptimizer):
+        optuna.logging.enable_default_handler()
         self.optuna_study.optimize(optimizer.evaluate_trial, n_trials=self.train_params['trials'],
                                    callbacks=[opt_utils.NeptuneCallback(log_study=True, log_charts=True)])
         opt_utils.log_study_info(self.optuna_study)

@@ -4,7 +4,7 @@ import lightgbm as lgb
 import xgboost as xgb
 import abc
 from datatable import Frame
-from typing import Tuple, TypeVar, Generic
+from typing import Tuple, TypeVar, Generic, Union
 from models import LightGBMModel, StudyModel, XGBoostModel
 from utils import get_score_corte
 
@@ -49,8 +49,8 @@ class ModelOptimizer(abc.ABC, Generic[TStudyModel]):
 
 
 class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
-    def __init__(self, X: Frame, y: np.ndarray, weights: np.ndarray,
-                 X_val: Frame, y_val: np.ndarray, weights_val: np.ndarray,
+    def __init__(self, X: Frame, y: Frame, weights: Union[Frame, None],
+                 X_val: Frame, y_val: Frame, weights_val: Union[Frame, None],
                  prob_corte_min=0.02, prob_corte_max=0.03, prob_corte=0.025):
         super().__init__(X, y.to_numpy(), weights.to_numpy() if weights is not None else None,
                          X_val, y_val.to_numpy(), weights_val.to_numpy() if weights_val is not None else None, prob_corte)

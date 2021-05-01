@@ -13,13 +13,13 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde) 
   double  y[100] ;
 
   int n = pcolumna.size();
-  NumericVector out( 5*n );
+  NumericVector out( 6*n );
 
   for(int i = 0; i < n; i++)
   {
     //lag
-    if( pdesde[i]-1 < i )  out[ i + 4*n ]  =  pcolumna[i-1] ;
-    else                   out[ i + 4*n ]  =  NA_REAL ;
+    if( pdesde[i]-1 < i )  out[ i + 5*n ]  =  pcolumna[i-1] ;
+    else                   out[ i + 5*n ]  =  NA_REAL ;
 
 
     int  libre    = 0 ;
@@ -64,6 +64,7 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde) 
       out[ i + n ]    =  vmin ;
       out[ i + 2*n ]  =  vmax ;
       out[ i + 3*n ]  =  ysum / libre ;
+      out[ i + 4*n ]  =  vmax - vmin;
     }
     else
     {
@@ -71,6 +72,7 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde) 
       out[ i + n   ]  =  NA_REAL ;
       out[ i + 2*n ]  =  NA_REAL ;
       out[ i + 3*n ]  =  NA_REAL ;
+      out[ i + 4*n ]  =  NA_REAL ;
     }
   }
 
@@ -82,7 +84,7 @@ t0 <- Sys.time()
 
 cat("Leyendo dataset\n")
 
-dataset <- fread("../datasets/datos_fe.gz")
+dataset <- fread("../datasets/datos_fe_v2.gz")
 cat("Dataset leido\n")
 
 setorder(dataset, numero_de_cliente, foto_mes)
@@ -117,8 +119,11 @@ for(campo in columnas_a_procesar) {
   dataset[, paste(campo, "__tend", sep="") := nueva_col[(0*last+1):(1*last)]]
   dataset[, paste(campo, "__min", sep="") := nueva_col[(1*last+1):(2*last)]]
   dataset[, paste(campo, "__max", sep="") := nueva_col[(2*last+1):(3*last)]]
-  dataset[, paste(campo, "__avg", sep="") := nueva_col[(3*last+1):(4*last)]]
   dataset[, paste(campo, "__lag", sep="") := nueva_col[(4*last+1):(5*last)]]
+  dataset[, paste(campo, "__dif_maxmin", sep="") := nueva_col[(5*last+1):(6*last)]]
+
+  # No resulto ser importante
+  # dataset[, paste(campo, "__avg", sep="") := nueva_col[(3*last+1):(4*last)]]
 }
 
 nuevo_orden <- c(setdiff(colnames(dataset), "clase_ternaria"), "clase_ternaria")
@@ -130,7 +135,7 @@ cat("El Feature Engineering ha corrido en: ", tiempo, " segundos.\n")
 
 cat("Guardando archivo\n")
 
-fwrite(dataset, file="../datasets/datos_fe_hist.gz")
+fwrite(dataset, file="../datasets/datos_fe_hist_v2.gz")
 
 cat("Archivo guardado\n")
 
