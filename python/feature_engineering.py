@@ -7,7 +7,6 @@ from utils import timer
 def run(dataset: Frame) -> Frame:
     dataset = arreglar_errores_dataset_original(dataset)
     dataset = agregar_variables_nuevas(dataset)
-    dataset = eliminar_registros_viejos(dataset)
 
     return dataset
 
@@ -62,13 +61,6 @@ def arreglar_errores_dataset_original(dataset: Frame) -> Frame:
     dataset[f.foto_mes == 201910, 'mcajeros_propios_descuentos'] = None
 
     dataset[f.foto_mes == 202001, 'cliente_vip'] = None
-
-    return dataset
-
-
-@timer
-def eliminar_registros_viejos(dataset: Frame) -> Frame:
-    dataset = dataset[f.foto_mes > 201912, :]
 
     return dataset
 
@@ -153,5 +145,5 @@ def leer_dataset() -> Frame:
 if __name__ == '__main__':
     dataset = leer_dataset()
     dataset = run(dataset)
-    dataset.to_csv(path='../datasets/datos_2020_fe_v2.gz', compression='gzip')
+    dataset.to_csv(path='../datasets/datos_fe_v2.gz', compression='gzip')
 

@@ -129,14 +129,14 @@ for(campo in columnas_a_procesar) {
 nuevo_orden <- c(setdiff(colnames(dataset), "clase_ternaria"), "clase_ternaria")
 setcolorder(dataset, nuevo_orden)
 
+dataset <- dataset[foto_mes > 201812, ]
+
 t1 <- Sys.time()
 tiempo <- as.numeric(t1 - t0, units = "secs")
 cat("El Feature Engineering ha corrido en: ", tiempo, " segundos.\n")
 
 cat("Guardando archivo\n")
-
 fwrite(dataset, file="../datasets/datos_fe_hist_v2.gz")
-
 cat("Archivo guardado\n")
 
 rm(list=ls())
