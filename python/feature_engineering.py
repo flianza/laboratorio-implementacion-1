@@ -104,6 +104,7 @@ def agregar_variables_nuevas(dataset: Frame) -> Frame:
 
     dataset['ctarjetas_credito'] = dataset[:, f.ctarjeta_master + f.ctarjeta_visa]
     dataset['ctarjetas'] = dataset[:, f.ctarjetas_credito + f.ctarjeta_debito]
+    dataset['ccomisiones'] = dataset[:, f.ccomisiones_mantenimiento + f.ccomisiones_otras]
 
     dataset['ratio_mrentabilidad__mcomisiones'] = dataset[:, f.mrentabilidad / f.mcomisiones]
     dataset['ratio_mcomisiones__ccomisiones'] = dataset[:, f.mcomisiones / f.ccomisiones]
@@ -139,7 +140,7 @@ def agregar_canaritos(dataset: Frame, cantidad: int = 20) -> Frame:
 
 @timer
 def leer_dataset() -> Frame:
-    return fread('datasets/originales/datos.gz')
+    return fread('../datasetsOri/paquete_premium.txt.gz')
 
 
 if __name__ == '__main__':
