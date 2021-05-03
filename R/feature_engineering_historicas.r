@@ -83,8 +83,7 @@ VENTANA <- 6
 t0 <- Sys.time()
 
 cat("Leyendo dataset\n")
-
-dataset <- fread("../datasets/datos_fe_v2.gz")
+dataset <- fread("../datasets/datos_fe_v3.gz")
 cat("Dataset leido\n")
 
 setorder(dataset, numero_de_cliente, foto_mes)
@@ -136,7 +135,7 @@ tiempo <- as.numeric(t1 - t0, units = "secs")
 cat("El Feature Engineering ha corrido en: ", tiempo, " segundos.\n")
 
 cat("Guardando archivo\n")
-fwrite(dataset, file="../datasets/datos_fe_hist_v2.gz")
+fwrite(dataset, file="../datasets/datos_fe_hist_v3.gz")
 cat("Archivo guardado\n")
 
 rm(list=ls())
