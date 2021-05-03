@@ -1,4 +1,4 @@
-from datatable import Frame, f, fread
+from datatable import Frame, f, fread, ifelse, math
 import datatable as dt
 import random
 from utils import timer
@@ -7,6 +7,7 @@ from utils import timer
 def run(dataset: Frame) -> Frame:
     dataset = arreglar_errores_dataset_original(dataset)
     dataset = agregar_variables_nuevas(dataset)
+    dataset = arreglar_infinitos(dataset)
 
     return dataset
 
@@ -137,6 +138,15 @@ def agregar_variables_nuevas(dataset: Frame) -> Frame:
     # dataset['ratio_mcomisiones__ccomisiones'] = dataset[:, f.mcomisiones / f.ccomisiones] # 574
     # dataset['ctransacciones'] = dataset[:, f.ccallcenter_transacciones + f.chomebanking_transacciones + f.ccajas_transacciones] # 626
     # dataset['ratio_ctransacciones__cproductos'] = dataset[:, f.ctransacciones / f.cproductos] # 442
+
+    return dataset
+
+
+@timer
+def arreglar_infinitos(dataset: Frame) -> Frame:
+    for column in dataset.names:
+        if column != 'clase_ternaria':
+            dataset[column] = dataset[:, ifelse(math.isinf(f[column]) == 1, None, f[column])]
 
     return dataset
 

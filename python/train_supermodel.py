@@ -30,14 +30,12 @@ if __name__ == '__main__':
     TRAIN_PARAMS['experimentos'] = args.experimentos
 
     dataset = fread(TRAIN_PARAMS['file_data'])
-    count = 1
     for experimento in args.experimentos:
         for file in os.listdir(f'../experimentos/{experimento}/'):
             if file.endswith('stacking_apply.csv'):
                 stacking = fread(f'../experimentos/{experimento}/{file}')
-                dataset[f'{experimento}_{count}_prob'] = stacking['prob']
-                dataset[f'{experimento}_{count}_estimulo'] = stacking['estimulo']
-                count += 1
+                dataset[f'{experimento}_prob'] = stacking['prob']
+                break
 
     dapply_kaggle = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_kaggle'], f[:].remove([f.clase_ternaria])]
     dataset = dataset[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_entero'], :]
