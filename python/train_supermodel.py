@@ -14,13 +14,16 @@ parser.set_defaults(binaria_especial=True)
 parser.add_argument("--experimentos", nargs="+", default=[])
 
 TRAIN_PARAMS = {
+    'seed': np.random.randint(123456),
     'trials': 20,
-    'file_data': '../datasets/datos_fe_hist.gz',
+    'file_data': '../datasets/datos_fe_hist_v3.gz',
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
     'max_foto_mes_entero': 202003,
     'foto_mes_kaggle': 202005,
 }
+
+np.random.seed(TRAIN_PARAMS['seed'])
 
 if __name__ == '__main__':
     args = parser.parse_args()
