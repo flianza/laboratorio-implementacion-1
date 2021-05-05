@@ -142,8 +142,8 @@ class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
             'reg_lambda': trial.suggest_float('reg_lambda', 0, 100),
             'gamma': trial.suggest_float('gamma', 0, 5),
             'min_child_weight': trial.suggest_float('min_child_weight', 0, 5),
-            'max_leaves': trial.suggest_int('max_leaves', 32, 1024),
-            'max_depth': trial.suggest_int('max_depth', 0, 100),
+            'max_leaves': trial.suggest_int('max_leaves', 32, 512),
+            'max_depth': trial.suggest_int('max_depth', 0, 50),
             'max_bin': trial.suggest_int('max_bin', 20, 40)
         }
 
