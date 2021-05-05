@@ -13,7 +13,7 @@ parser.set_defaults(binaria_especial=True)
 
 TRAIN_PARAMS = {
     'seed': np.random.randint(123456),
-    'trials': 20,
+    'trials': 15,
     'file_data': '../datasets/datos_fe_hist_v3.gz',
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
