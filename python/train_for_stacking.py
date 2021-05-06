@@ -30,11 +30,6 @@ if __name__ == '__main__':
     TRAIN_PARAMS['model'] = args.model
 
     dataset_original = fread(TRAIN_PARAMS['file_data'])
-    print('Inicio computado campos lag2')
-    campos = set(dataset_original.names) - {'numero_de_cliente', 'clase_ternaria', 'foto_mes'}
-    for campo in campos:
-        dataset_original[f'{campo}_lag2'] = dataset_original[:, shift(f[campo]), by('numero_de_cliente')][:, f[campo]]
-    print('Fin computado campos lag2')
 
     dataset = dataset_original[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_entero'], :]
 

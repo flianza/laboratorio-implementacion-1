@@ -94,18 +94,18 @@ def agregar_variables_nuevas(dataset: Frame) -> Frame:
     dataset['tarjetas_cadelantosefectivo'] = dataset[:, dt.rowsum([f.Master_cadelantosefectivo, f.Visa_cadelantosefectivo])]
     dataset['tarjetas_mpagominimo'] = dataset[:, dt.rowsum([f.Master_mpagominimo, f.Visa_mpagominimo])]
 
-    dataset['ratio_tarjetas_msaldototal__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mlimitecompra / f.tarjetas_mlimitecompra]
-    dataset['ratio_tarjetas_msaldodolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_msaldodolares / f.tarjetas_mlimitecompra]
-    dataset['ratio_tarjetas_msaldodolares__tarjetas_msaldototal'] = dataset[:, f.tarjetas_msaldodolares / f.tarjetas_msaldototal]
-    dataset['ratio_tarjetas_mconsumospesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mconsumospesos / f.tarjetas_mlimitecompra]
-    dataset['ratio_tarjetas_madelantopesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_madelantopesos / f.tarjetas_mlimitecompra]
-    dataset['ratio_tarjetas_madelantodolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_madelantodolares / f.tarjetas_mlimitecompra]
-    dataset['ratio_tarjetas_mpagospesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagospesos / f.tarjetas_mlimitecompra]
-    dataset['ratio_tarjetas_mpagominimo__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagominimo / f.tarjetas_mlimitecompra]
+    dataset['ratio_tarjetas_msaldototal__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mlimitecompra / f.tarjetas_mlimitecompra] # no aparece
+    dataset['ratio_tarjetas_msaldodolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_msaldodolares / f.tarjetas_mlimitecompra] # 573
+    dataset['ratio_tarjetas_msaldodolares__tarjetas_msaldototal'] = dataset[:, f.tarjetas_msaldodolares / f.tarjetas_msaldototal] # 348
+    dataset['ratio_tarjetas_mconsumospesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mconsumospesos / f.tarjetas_mlimitecompra] # 747
+    dataset['ratio_tarjetas_madelantopesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_madelantopesos / f.tarjetas_mlimitecompra] # 155
+    dataset['ratio_tarjetas_madelantodolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_madelantodolares / f.tarjetas_mlimitecompra] # no aparece
+    dataset['ratio_tarjetas_mpagospesos__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagospesos / f.tarjetas_mlimitecompra] # 397
+    dataset['ratio_tarjetas_mpagominimo__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagominimo / f.tarjetas_mlimitecompra] # 115
 
+    # v2
     dataset['ctarjetas_credito'] = dataset[:, f.ctarjeta_master + f.ctarjeta_visa] # 60
     dataset['ctarjetas'] = dataset[:, f.ctarjetas_credito + f.ctarjeta_debito] # 241
-
     dataset['ratio_mrentabilidad__mcomisiones'] = dataset[:, f.mrentabilidad / f.mcomisiones] # 315
     dataset['ratio_mrentabilidad__cproductos'] = dataset[:, f.mrentabilidad / f.cproductos] # 379
     dataset['ratio_mprestamos_personales__cprestamos_personales'] = dataset[:, f.mprestamos_personales / f.cprestamos_personales] # 55
@@ -113,19 +113,16 @@ def agregar_variables_nuevas(dataset: Frame) -> Frame:
     dataset['cextracciones'] = dataset[:, f.cextraccion_autoservicio + f.ccajas_extracciones] # 153
     dataset['ratio_mextraccion_autoservicio__mcuentas_saldo'] = dataset[:, f.mextraccion_autoservicio / f.mcuentas_saldo] # 327
 
-    dataset['mpayroll_total'] = dataset[:, f.mpayroll + f.mpayroll2]
-    dataset['ratio_mpayroll_total__cliente_edad'] = dataset[:, f.mpayroll_total / f.cliente_edad]
-    dataset['ratio_mcaja_ahorro__cliente_edad'] = dataset[:, f.mcaja_ahorro / f.cliente_edad]
-    dataset['ratio_mcuentas_saldo__cliente_edad'] = dataset[:, f.mcuentas_saldo / f.cliente_edad]
-    dataset['ratio_cliente_antiguedad__cliente_edad'] = dataset[:, f.cliente_antiguedad / f.cliente_edad]
-    dataset['cseguros_total'] = dataset[:, f.cseguro_vida + f.cseguro_auto + f.cseguro_vivienda + f.cseguro_accidentes_personales]
-
-    dataset['ratio_cseguros_total__cliente_antiguedad'] = dataset[:, f.cseguros_total / f.cliente_antiguedad]
-    dataset['ratio_mrentabilidad__mcuentas_saldo'] = dataset[:, f.mrentabilidad / f.mcuentas_saldo]
-    dataset['ratio_mrentabilidad__cliente_antiguedad'] = dataset[:, f.mrentabilidad / f.cliente_antiguedad]
-    dataset['ratio_mrentabilidad__cliente_edad'] = dataset[:, f.mrentabilidad / f.cliente_edad]
+    # v3
+    dataset['mpayroll_total'] = dataset[:, f.mpayroll + f.mpayroll2] # 50
+    dataset['ratio_mpayroll_total__cliente_edad'] = dataset[:, f.mpayroll_total / f.cliente_edad] # 38
+    dataset['ratio_mcaja_ahorro__cliente_edad'] = dataset[:, f.mcaja_ahorro / f.cliente_edad] # 21
+    dataset['ratio_mcuentas_saldo__cliente_edad'] = dataset[:, f.mcuentas_saldo / f.cliente_edad] # 54
+    dataset['cseguros_total'] = dataset[:, f.cseguro_vida + f.cseguro_auto + f.cseguro_vivienda + f.cseguro_accidentes_personales] # 263
+    dataset['ratio_cseguros_total__cliente_antiguedad'] = dataset[:, f.cseguros_total / f.cliente_antiguedad] # 372
 
     # Resultaron no ser importantes
+    # v1
     # dataset['ratio_tarjetas_mpagado__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagado / f.tarjetas_mlimitecompra]
     # dataset['ratio_tarjetas_mpagosdolares__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mpagosdolares / f.tarjetas_mlimitecompra]
     # dataset['ratio_tarjetas_mconsumototal__tarjetas_mlimitecompra'] = dataset[:, f.tarjetas_mconsumototal / f.tarjetas_mlimitecompra]
@@ -134,10 +131,17 @@ def agregar_variables_nuevas(dataset: Frame) -> Frame:
     # dataset['ratio_tarjetas_msaldopesos__tarjetas_msaldototal'] = dataset[:, f.tarjetas_msaldopesos / f.tarjetas_msaldototal]
     # dataset['ratio_Master_mlimitecompra__tarjetas_mlimitecompra'] = dataset[:, f.Master_mlimitecompra / f.tarjetas_mlimitecompra]
     # dataset['ratio_Visa_mlimitecompra__tarjetas_mlimitecompra'] = dataset[:, f.Visa_mlimitecompra / f.tarjetas_mlimitecompra]
+    # v2
     # dataset['ccomisiones'] = dataset[:, f.ccomisiones_mantenimiento + f.ccomisiones_otras] # 641
     # dataset['ratio_mcomisiones__ccomisiones'] = dataset[:, f.mcomisiones / f.ccomisiones] # 574
     # dataset['ctransacciones'] = dataset[:, f.ccallcenter_transacciones + f.chomebanking_transacciones + f.ccajas_transacciones] # 626
     # dataset['ratio_ctransacciones__cproductos'] = dataset[:, f.ctransacciones / f.cproductos] # 442
+    # v3
+    # dataset['ratio_mrentabilidad__mcuentas_saldo'] = dataset[:, f.mrentabilidad / f.mcuentas_saldo] # 1597
+    # dataset['ratio_mrentabilidad__cliente_antiguedad'] = dataset[:, f.mrentabilidad / f.cliente_antiguedad] # 818
+    # dataset['ratio_mrentabilidad__cliente_edad'] = dataset[:, f.mrentabilidad / f.cliente_edad] # 828
+    # dataset['ratio_cliente_antiguedad__cliente_edad'] = dataset[:, f.cliente_antiguedad / f.cliente_edad] # 768
+
 
     return dataset
 
