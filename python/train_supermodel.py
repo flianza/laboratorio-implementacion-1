@@ -8,6 +8,7 @@ from studies import Study
 
 parser = argparse.ArgumentParser()
 parser.add_argument('--model')
+parser.add_argument('--version')
 parser.add_argument('--binaria-especial', dest='binaria_especial', action='store_true')
 parser.add_argument('--binaria-comun', dest='binaria_especial', action='store_false')
 parser.set_defaults(binaria_especial=True)
@@ -16,7 +17,6 @@ parser.add_argument("--experimentos", nargs="+", default=[])
 TRAIN_PARAMS = {
     'seed': np.random.randint(123456),
     'trials': 20,
-    'file_data': '../datasets/datos_fe_hist_v3.gz',
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
     'max_foto_mes_entero': 202003,
@@ -31,6 +31,7 @@ if __name__ == '__main__':
     TRAIN_PARAMS['binaria_especial'] = args.binaria_especial
     TRAIN_PARAMS['model'] = args.model
     TRAIN_PARAMS['experimentos'] = args.experimentos
+    TRAIN_PARAMS['file_data'] = f'../datasets/datos_fe_hist_v{args.version}.gz'
 
     dataset = fread(TRAIN_PARAMS['file_data'])
 

@@ -1,9 +1,20 @@
 rm(list=ls())
 gc()
 
-library("data.table")
-library("Rcpp")
-library("here")
+libs = c("data.table", "Rcpp", "here", "optparse")
+for (i in libs){
+  if(!is.element(i, .packages(all.available = TRUE)) ) {
+    install.packages(i, repos = "http://cran.us.r-project.org")
+  }
+  library(i, character.only = TRUE)
+}
+
+option_list = list(
+  make_option(c("-v", "--version"), type="character", default=NULL, metavar="character")
+);
+
+opt_parser = OptionParser(option_list=option_list);
+opt = parse_args(opt_parser);
 
 setwd(here())
 
@@ -83,7 +94,7 @@ VENTANA <- 6
 t0 <- Sys.time()
 
 cat("Leyendo dataset\n")
-dataset <- fread("../datasets/datos_fe_v3.gz")
+dataset <- fread(paste0("../datasets/datos_fe_v", opt$version, ".gz"))
 cat("Dataset leido\n")
 
 setorder(dataset, numero_de_cliente, foto_mes)
@@ -133,7 +144,7 @@ tiempo <- as.numeric(t1 - t0, units = "secs")
 cat("El Feature Engineering ha corrido en: ", tiempo, " segundos.\n")
 
 cat("Guardando archivo\n")
-fwrite(dataset, file="../datasets/datos_fe_hist_v4.gz")
+fwrite(dataset, file=paste0("../datasets/datos_fe_hist_v", opt$version, ".gz"))
 cat("Archivo guardado\n")
 
 rm(list=ls())

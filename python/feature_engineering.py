@@ -1,6 +1,7 @@
 from datatable import Frame, f, fread, ifelse, math
 import datatable as dt
 import random
+import argparse
 from utils import timer
 
 
@@ -184,8 +185,11 @@ def leer_dataset() -> Frame:
     return fread('../datasetsOri/paquete_premium.txt.gz')
 
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--version')
 if __name__ == '__main__':
+    args = parser.parse_args()
     dataset = leer_dataset()
     dataset = run(dataset)
-    dataset.to_csv(path='../datasets/datos_fe_v4.gz', compression='gzip')
+    dataset.to_csv(path=f'../datasets/datos_fe_v{args.version}.gz', compression='gzip')
 
