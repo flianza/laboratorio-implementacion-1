@@ -1,7 +1,7 @@
 import argparse
 import numpy as np
 import os
-from datatable import fread, f, ifelse, Frame
+from datatable import fread, f, ifelse, Frame, shift, by
 
 from optimizers import XGBoostOptimizer, LightGBMOptimizer
 from studies import Study
@@ -15,7 +15,7 @@ parser.add_argument("--experimentos", nargs="+", default=[])
 
 TRAIN_PARAMS = {
     'seed': np.random.randint(123456),
-    'trials': 15,
+    'trials': 20,
     'file_data': '../datasets/datos_fe_hist_v3.gz',
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
@@ -33,6 +33,11 @@ if __name__ == '__main__':
     TRAIN_PARAMS['experimentos'] = args.experimentos
 
     dataset = fread(TRAIN_PARAMS['file_data'])
+
+    campos = set(dataset.names) - {'numero_de_cliente', 'clase_ternaria', 'foto_mes'}
+    for campo in campos:
+        dataset[f'{campo}_lag2'] = dataset[:, shift(f[campo]), by('numero_de_cliente')]
+
     for experimento in args.experimentos:
         for file in os.listdir(f'../experimentos/{experimento}/'):
             if file.endswith('stacking_apply.csv'):
@@ -53,11 +58,11 @@ if __name__ == '__main__':
         dataset['target'] = dataset[:, f.clase_ternaria == 'BAJA+2']
         campos_buenos = f[:].remove([f.clase_ternaria, f.target, f.azar, f.clase01])
 
-    X = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.5)), campos_buenos]
-    y = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.5)), f.target]
+    X = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.1)), campos_buenos]
+    y = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.1)), f.target]
     weights = None
     if args.binaria_especial:
-        weights = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.5)), f.weight]
+        weights = dataset[(f.foto_mes <= TRAIN_PARAMS['max_foto_mes_train']) & ((f.clase01 == 1) | (f.azar < 0.1)), f.weight]
 
     X_val = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_val'], campos_buenos]
     y_val = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_val'], f.target]

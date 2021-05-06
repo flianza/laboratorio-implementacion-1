@@ -1,6 +1,6 @@
 import argparse
 import numpy as np
-from datatable import fread, f, ifelse, Frame
+from datatable import fread, f, ifelse, Frame, shift, by
 
 from optimizers import XGBoostOptimizer, LightGBMOptimizer
 from studies import Study
@@ -13,8 +13,8 @@ parser.set_defaults(binaria_especial=True)
 
 TRAIN_PARAMS = {
     'seed': np.random.randint(123456),
-    'trials': 15,
-    'file_data': '../datasets/datos_fe_hist_v3.gz',
+    'trials': 20,
+    'file_data': '../datasets/datos_fe_hist_v4.gz',
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
     'max_foto_mes_entero': 202003,
@@ -29,8 +29,15 @@ if __name__ == '__main__':
     TRAIN_PARAMS['binaria_especial'] = args.binaria_especial
     TRAIN_PARAMS['model'] = args.model
 
-    dataset = fread(TRAIN_PARAMS['file_data'])
-    dataset = dataset[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_entero'], :]
+    dataset_original = fread(TRAIN_PARAMS['file_data'])
+    print('Inicio computado campos lag2')
+    campos = set(dataset_original.names) - {'numero_de_cliente', 'clase_ternaria', 'foto_mes'}
+    for campo in campos:
+        dataset_original[f'{campo}_lag2'] = dataset_original[:, shift(f[campo]), by('numero_de_cliente')][:, f[campo]]
+    print('Fin computado campos lag2')
+
+    dataset = dataset_original[f.foto_mes <= TRAIN_PARAMS['max_foto_mes_entero'], :]
+
     dataset['azar'] = np.random.uniform(size=dataset.shape[0])
     dataset['clase01'] = dataset[:, ifelse(f.clase_ternaria == 'CONTINUA', 0, 1)]
 
@@ -58,16 +65,16 @@ if __name__ == '__main__':
 
     with Study(TRAIN_PARAMS) as study:
         if args.model == 'xgboost':
-            optimizer = XGBoostOptimizer(X, y, weights, X_val, y_val, weights_val, 0.1, 0.2)
+            optimizer = XGBoostOptimizer(X, y, weights, X_val, y_val, weights_val, 0.05, 0.15)
         else:
-            optimizer = LightGBMOptimizer(X, y, weights, X_val, y_val, weights_val, 0.1, 0.2)
+            optimizer = LightGBMOptimizer(X, y, weights, X_val, y_val, weights_val, 0.05, 0.15)
 
         study_importance = study.optimize(optimizer)
         study.log_csv(study_importance, f'{study.experiment_files_prefix}_study_importance.csv')
 
         best_models = optimizer.get_best_models()
 
-        dataset = fread(TRAIN_PARAMS['file_data'])[:, f[:].remove([f.clase_ternaria])]
+        dataset = dataset_original[:, f[:].remove([f.clase_ternaria])]
         dapply_stacking = dataset
         dapply_kaggle = dataset[f.foto_mes == TRAIN_PARAMS['foto_mes_kaggle'], :]
 

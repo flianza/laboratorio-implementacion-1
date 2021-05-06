@@ -79,10 +79,10 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
         self.prob_corte = trial.suggest_float('prob_corte', self.prob_corte_min, self.prob_corte_max)
 
         variable_params = {
-            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.3),
-            'feature_fraction': trial.suggest_float('feature_fraction', 0.3, 0.7),
+            'learning_rate': trial.suggest_float('learning_rate', 0.01, 0.2),
+            'feature_fraction': trial.suggest_float('feature_fraction', 0.5, 0.7),
             'min_data_in_leaf': trial.suggest_int('min_data_in_leaf', 1, 5000),
-            'num_leaves': trial.suggest_int('num_leaves', 16, 1024),
+            'num_leaves': trial.suggest_int('num_leaves', 16, 512),
             'max_bin': trial.suggest_int('max_bin', 15, 50),
             'lambda_l1': trial.suggest_float('lambda_l1', 0, 5),
             'lambda_l2': trial.suggest_float('lambda_l2', 0, 100),
@@ -136,8 +136,8 @@ class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
         self.__actualizar_prob_corte(trial.suggest_float('prob_corte', self.prob_corte_min, self.prob_corte_max))
 
         variable_params = {
-            'eta': trial.suggest_float('eta', 0.01, 0.3),
-            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.2, 0.8),
+            'eta': trial.suggest_float('eta', 0.01, 0.2),
+            'colsample_bytree': trial.suggest_float('colsample_bytree', 0.5, 0.7),
             'reg_alpha': trial.suggest_float('reg_alpha', 0, 5),
             'reg_lambda': trial.suggest_float('reg_lambda', 0, 100),
             'gamma': trial.suggest_float('gamma', 0, 5),

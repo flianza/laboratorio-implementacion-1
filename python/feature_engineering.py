@@ -167,5 +167,5 @@ def leer_dataset() -> Frame:
 if __name__ == '__main__':
     dataset = leer_dataset()
     dataset = run(dataset)
-    dataset.to_csv(path='../datasets/datos_fe_v3.gz', compression='gzip')
+    dataset.to_csv(path='../datasets/datos_fe_v4.gz', compression='gzip')
 

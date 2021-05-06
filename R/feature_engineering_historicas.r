@@ -118,11 +118,9 @@ for(campo in columnas_a_procesar) {
   dataset[, paste(campo, "__tend", sep="") := nueva_col[(0*last+1):(1*last)]]
   dataset[, paste(campo, "__min", sep="") := nueva_col[(1*last+1):(2*last)]]
   dataset[, paste(campo, "__max", sep="") := nueva_col[(2*last+1):(3*last)]]
-  dataset[, paste(campo, "__lag", sep="") := nueva_col[(4*last+1):(5*last)]]
-  dataset[, paste(campo, "__dif_maxmin", sep="") := nueva_col[(5*last+1):(6*last)]]
-
-  # No resulto ser importante
-  # dataset[, paste(campo, "__avg", sep="") := nueva_col[(3*last+1):(4*last)]]
+  dataset[, paste(campo, "__avg", sep="") := nueva_col[(3*last+1):(4*last)]]
+  dataset[, paste(campo, "__dif_maxmin", sep="") := nueva_col[(4*last+1):(5*last)]]
+  dataset[, paste(campo, "__lag", sep="") := nueva_col[(5*last+1):(6*last)]]
 }
 
 nuevo_orden <- c(setdiff(colnames(dataset), "clase_ternaria"), "clase_ternaria")
@@ -135,7 +133,7 @@ tiempo <- as.numeric(t1 - t0, units = "secs")
 cat("El Feature Engineering ha corrido en: ", tiempo, " segundos.\n")
 
 cat("Guardando archivo\n")
-fwrite(dataset, file="../datasets/datos_fe_hist_v3.gz")
+fwrite(dataset, file="../datasets/datos_fe_hist_v4.gz")
 cat("Archivo guardado\n")
 
 rm(list=ls())
