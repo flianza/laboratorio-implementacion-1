@@ -7,6 +7,7 @@ from utils import timer
 def run(dataset: Frame) -> Frame:
     dataset = arreglar_errores_dataset_original(dataset)
     dataset = agregar_variables_nuevas(dataset)
+    dataset = eliminar_columnas(dataset)
     dataset = arreglar_infinitos(dataset)
 
     return dataset
