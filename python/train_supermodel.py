@@ -16,7 +16,7 @@ parser.add_argument("--experimentos", nargs="+", default=[])
 
 TRAIN_PARAMS = {
     'seed': np.random.randint(123456),
-    'trials': 20,
+    'trials': 30,
     'max_foto_mes_train': 202002,
     'foto_mes_val': 202003,
     'max_foto_mes_entero': 202003,
@@ -34,11 +34,6 @@ if __name__ == '__main__':
     TRAIN_PARAMS['file_data'] = f'../datasets/datos_fe_hist_v{args.version}.gz'
 
     dataset = fread(TRAIN_PARAMS['file_data'])
-
-    campos = set(dataset.names) - {'numero_de_cliente', 'clase_ternaria', 'foto_mes'}
-    for campo in campos:
-        dataset[f'{campo}_lag2'] = dataset[:, shift(f[campo]), by('numero_de_cliente')]
-
     for experimento in args.experimentos:
         for file in os.listdir(f'../experimentos/{experimento}/'):
             if file.endswith('stacking_apply.csv'):
@@ -75,9 +70,9 @@ if __name__ == '__main__':
 
     with Study(TRAIN_PARAMS) as study:
         if args.model == 'xgboost':
-            optimizer = XGBoostOptimizer(X, y, weights, X_val, y_val, weights_val, 0.05, 0.15)
+            optimizer = XGBoostOptimizer(X, y, weights, X_val, y_val, weights_val, 0.05, 0.2)
         else:
-            optimizer = LightGBMOptimizer(X, y, weights, X_val, y_val, weights_val, 0.05, 0.15)
+            optimizer = LightGBMOptimizer(X, y, weights, X_val, y_val, weights_val, 0.05, 0.2)
 
         study_importance = study.optimize(optimizer)
         study.log_csv(study_importance, f'{study.experiment_files_prefix}_study_importance.csv')

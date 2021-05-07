@@ -1,4 +1,4 @@
-from datatable import Frame, f, fread, ifelse, math
+from datatable import Frame, f, fread, ifelse, math, mean
 import datatable as dt
 import random
 import argparse
@@ -130,6 +130,13 @@ def agregar_variables_nuevas(dataset: Frame) -> Frame:
     dataset['cseguros_total'] = dataset[:, f.cseguro_vida + f.cseguro_auto + f.cseguro_vivienda + f.cseguro_accidentes_personales] # 454
     dataset['ratio_cseguros_total__cliente_antiguedad'] = dataset[:, f.cseguros_total / f.cliente_antiguedad] # 628
 
+    # v7
+    dataset['tarjetas_mconsumo_mes'] = dataset[:, f.mtarjeta_visa_consumo + f.mtarjeta_master_consumo] # 45
+    dataset['tarjetas_mconsumototal'] = dataset[:, f.Master_mconsumototal + f.Visa_mconsumototal] # 419
+    dataset['ratio_tarjetas_consumo_mes__cliente_edad'] = dataset[:, f.tarjetas_mconsumo_mes / f.cliente_edad] # 51
+    dataset['score_04'] = dataset[:, (f.ctarjetas_credito * f.tarjetas_delinquency) / f.cliente_edad] # 695
+    dataset['score_04_relativo'] = dataset[:, f.score_04 / mean(f.score_04)] # 267
+
     # Resultaron no ser importantes
 
     # v1
@@ -146,19 +153,45 @@ def agregar_variables_nuevas(dataset: Frame) -> Frame:
     # dataset['ratio_mrentabilidad__cliente_edad'] = dataset[:, f.mrentabilidad / f.cliente_edad] # 1811
     # dataset['ratio_cliente_antiguedad__cliente_edad'] = dataset[:, f.cliente_antiguedad / f.cliente_edad] # 1719
 
+    # v7
+    # dataset['score_01_relativo'] = dataset[:, f.score_01 / mean(f.score_01)] # no aparece
+    # dataset['score_02_relativo'] = dataset[:, f.score_02 / mean(f.score_02)] # 2507
+    # dataset['score_03_relativo'] = dataset[:, f.score_03 / mean(f.score_03)] # 2454
+    # dataset['ratio_tarjetas_mconsumototal__cliente_edad'] = dataset[:, f.tarjetas_mconsumototal / f.cliente_edad] # 2459
+    # dataset['ratio_Visa_mconsumospesos__cliente_edad'] = dataset[:, f.Visa_mconsumospesos / f.cliente_edad] # 2485
+    # dataset['ratio_Visa_mconsumosdolares__cliente_edad'] = dataset[:, f.Visa_mconsumosdolares / f.cliente_edad] # 2486
+    # dataset['ratio_Visa_mconsumototal__cliente_edad'] = dataset[:, f.Visa_mconsumototal / f.cliente_edad] # 2429
+    # dataset['ratio_Master_mconsumospesos__cliente_edad'] = dataset[:, f.Master_mconsumospesos / f.cliente_edad] # 2501
+    # dataset['ratio_Master_mconsumosdolares__cliente_edad'] = dataset[:, f.Master_mconsumosdolares / f.cliente_edad] # 2345
+    # dataset['ratio_Master_mconsumototal__cliente_edad'] = dataset[:, f.Master_mconsumototal / f.cliente_edad] # 2493
+    # dataset['ratio_ctransacciones__cliente_edad'] = dataset[:, f.ctransacciones / f.cliente_edad] # 2508
+    # dataset['score_01'] = dataset[:, (f.ctarjetas * f.mrentabilidad) / f.ctrx_quarter] # 2575
+    # dataset['score_02'] = dataset[:, (f.ctarjetas * f.ctransacciones) / f.ctrx_quarter] # 2507
+    # dataset['score_03'] = dataset[:, (f.ctarjetas * f.ctransacciones) / f.cliente_edad] # 2498
+
     return dataset
 
 
 @timer
 def eliminar_columnas(dataset: Frame) -> Frame:
-    columnas_a_eliminar = [
-        'tarjetas_msaldodolares',
-        'tarjetas_mconsumosdolares',
-        'tarjetas_mpagosdolares',
-    ]
+    feature_importance = fread('../analisis_feature_importance.csv')[500:, :]
+    columnas_a_mantener = ['numero_de_cliente', 'foto_mes', 'clase_ternaria']
 
-    for columna in columnas_a_eliminar:
-        dataset[columna] = None
+    for i in range(feature_importance.shape[0]):
+        columna = feature_importance[i, f.variable].to_numpy().flatten()[0]
+        if columna not in columnas_a_mantener:
+            dataset[columna] = None
+            del dataset[:, columna]
+
+    # columnas_a_eliminar = [
+    #     'tarjetas_msaldodolares',
+    #     'tarjetas_mconsumosdolares',
+    #     'tarjetas_mpagosdolares'
+    # ]
+    #
+    # for columna in columnas_a_eliminar:
+    #     dataset[columna] = None
+    #     del dataset[:, columna]
 
     return dataset
 

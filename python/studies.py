@@ -27,6 +27,19 @@ class Study(Generic[TModelOptimizer]):
         self.optuna_study = optuna.create_study(study_name=self.experiment_number, direction='maximize',
                                                 storage=storage, sampler=TPESampler(seed=self.train_params['seed']))
 
+        self.optuna_study.enqueue_trial({
+            'prob_corte': 0.1436483860126172,
+            'eta': 0.0704510499973727,
+            'colsample_bytree': 0.5085641821288974,
+            'reg_alpha': 3.929925432157357,
+            'reg_lambda': 1.898712607757858,
+            'gamma': 1.0978847764856066,
+            'min_child_weight': 3.3109497018230534,
+            'max_leaves': 114,
+            'max_depth': 16,
+            'max_bin': 35
+        })
+
         return self
 
     def __exit__(self, type, value, traceback):

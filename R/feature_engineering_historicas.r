@@ -1,20 +1,10 @@
 rm(list=ls())
 gc()
 
-libs = c("data.table", "Rcpp", "here", "optparse")
+libs = c("data.table", "Rcpp", "here")
 for (i in libs){
-  if(!is.element(i, .packages(all.available = TRUE)) ) {
-    install.packages(i, repos = "http://cran.us.r-project.org")
-  }
   library(i, character.only = TRUE)
 }
-
-option_list = list(
-  make_option(c("-v", "--version"), type="character", default=NULL, metavar="character")
-);
-
-opt_parser = OptionParser(option_list=option_list);
-opt = parse_args(opt_parser);
 
 setwd(here())
 
@@ -91,10 +81,12 @@ cppFunction('NumericVector fhistC(NumericVector pcolumna, IntegerVector pdesde) 
 }')
 
 VENTANA <- 6
+VERSION <- 9
+
 t0 <- Sys.time()
 
-cat("Leyendo dataset\n")
-dataset <- fread(paste0("../datasets/datos_fe_v", opt$version, ".gz"))
+cat(paste0("Leyendo dataset", "../datasets/datos_fe_v", VERSION, ".gz\n"))
+dataset <- fread(paste0("../datasets/datos_fe_v", VERSION, ".gz"))
 cat("Dataset leido\n")
 
 setorder(dataset, numero_de_cliente, foto_mes)
@@ -144,7 +136,7 @@ tiempo <- as.numeric(t1 - t0, units = "secs")
 cat("El Feature Engineering ha corrido en: ", tiempo, " segundos.\n")
 
 cat("Guardando archivo\n")
-fwrite(dataset, file=paste0("../datasets/datos_fe_hist_v", opt$version, ".gz"))
+fwrite(dataset, file=paste0("../datasets/datos_fe_hist_v", VERSION, ".gz"))
 cat("Archivo guardado\n")
 
 rm(list=ls())

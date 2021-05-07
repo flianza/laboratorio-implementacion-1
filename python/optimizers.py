@@ -22,6 +22,7 @@ class ModelOptimizer(abc.ABC, Generic[TStudyModel]):
         self.y_val = y_val
         self.weights_val = weights_val
         self.prob_corte = prob_corte
+        self.binaria_especial = weights is not None
 
         self.models = []
 
@@ -93,9 +94,9 @@ class LightGBMOptimizer(ModelOptimizer[LightGBMModel]):
 
         booster = lgb.train(params,
                             lgb.Dataset(self.X, label=self.y, weight=self.weights, feature_name=self.X.names),
-                            num_boost_round=99999,
+                            num_boost_round=5000,
                             feval=self._evaluate,
-                            early_stopping_rounds=int(50 + 5 / params['learning_rate']),
+                            early_stopping_rounds=100,
                             valid_sets=[lgb.Dataset(self.X_val, label=self.y_val, weight=self.weights_val)],
                             valid_names=['validation'],
                             verbose_eval=False)
@@ -111,7 +112,7 @@ class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
                  prob_corte_min=0.02, prob_corte_max=0.03, prob_corte=0.025):
         super().__init__(X, y, weights, X_val, y_val, weights_val, prob_corte)
         self.__actualizar_prob_corte(prob_corte)
-        self.prob_corte_min = prob_corte_min
+        self.prob_corte_min = prob_corte_min if not self.binaria_especial else prob_corte_min + 0.03
         self.prob_corte_max = prob_corte_max
 
         self.fixed_params = {
@@ -143,7 +144,7 @@ class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
             'gamma': trial.suggest_float('gamma', 0, 5),
             'min_child_weight': trial.suggest_float('min_child_weight', 0, 5),
             'max_leaves': trial.suggest_int('max_leaves', 32, 512),
-            'max_depth': trial.suggest_int('max_depth', 0, 50),
+            'max_depth': trial.suggest_int('max_depth', 8, 50),
             'max_bin': trial.suggest_int('max_bin', 20, 40)
         }
 
@@ -151,10 +152,10 @@ class XGBoostOptimizer(ModelOptimizer[XGBoostModel]):
 
         booster = xgb.train(params,
                             xgb.DMatrix(self.X, label=self.y, weight=self.weights),
-                            num_boost_round=99999,
+                            num_boost_round=5000,
                             feval=self._evaluate,
                             maximize=True,
-                            early_stopping_rounds=int(50 + 5 / params['eta']),
+                            early_stopping_rounds=100,
                             evals=[(xgb.DMatrix(self.X_val, label=self.y_val, weight=self.weights_val), 'validation')],
                             verbose_eval=False)
 
